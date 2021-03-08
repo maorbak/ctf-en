@@ -1,6 +1,8 @@
 import requests
 from requests.auth import HTTPBasicAuth
 
+import json
+
 from env import config
 
 headers = {
@@ -8,9 +10,11 @@ headers = {
 }
 
 orgs_url = f"{config['MERAKI_BASE_URL']}/organizations"
-resp = requests.get(orgs_url, headers=headers)
+orgs = requests.get(orgs_url, headers=headers)
 
-org_id = resp.json()[0]['id']
+for item in orgs.json():
+    if item['name'] == "DevNet Sandbox":
+        org_id = item['id']
 
 getNetwork_url = f"{config['MERAKI_BASE_URL']}/organizations/{org_id}/networks"
 
@@ -29,17 +33,32 @@ devices = requests.get(getDevice_url, headers=headers)
 
 #print(devices.json())
 
-counter = 1
+#for item in devices.json():
+#    print('----------', "\n")
+#    print('Device number ', str(counter), "\n")
+#    if 'name' in item:
+#        print("Name: " + item['name'] + "\n")
+#    if 'type' in item:
+#        print("Type: " + item['type'] + "\n")
+#    if 'mac' in item:
+#        print("Mac address: " + item['mac'] + "\n")
+#    if 'serial' in item:
+#        print("Serial: " + item['serial'] + "\n")
+#    counter = counter + 1
+
+device_list = []
 
 for item in devices.json():
-    print('----------', "\n")
-    print('Device number ', str(counter), "\n")
+    device_dict = {}
     if 'name' in item:
-        print("Name: " + item['name'] + "\n")
+        device_dict["name"] = item["name"]
     if 'type' in item:
-        print("Type: " + item['type'] + "\n")
+        device_dict["type"] = item["model"]
     if 'mac' in item:
-        print("Mac address: " + item['mac'] + "\n")
+        device_dict["mac"] = item["mac"]
     if 'serial' in item:
-        print("Serial: " + item['serial'] + "\n")
-    counter = counter + 1
+        device_dict["serial"] = item["serial"]
+    device_list.append(device_dict)
+
+with open("stage1.json", "w") as outfile:
+    json.dump(device_list, outfile)
