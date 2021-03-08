@@ -44,3 +44,31 @@ for item in devices.json():
 
 with open("stage1.json", "w") as outfile:
     json.dump(device_list, outfile)
+
+
+dnac_auth_url = f"{config['DNAC_BASE_URL']}/dna/system/api/v1/auth/token"
+
+myToken = requests.post(dnac_auth_url, auth=HTTPBasicAuth(config['DNAC_USER'], config['DNAC_PASSWORD']))
+
+header = {
+    'x-auth-token': myToken.json()['Token']
+}
+
+getDevice_url = f"{config['DNAC_BASE_URL']}/dna/intent/api/v1/network-device"
+devs = requests.get(getDevice_url, headers=header)
+
+for item in devs.json()['response']:
+    device_dict = {}
+    if 'hostname' in item:
+        device_dict["name"] = item["hostname"]
+    if 'type' in item:
+        device_dict["type"] = item["type"]
+    if 'mac' in item:
+        device_dict["macAddress"] = item["macAddress"]
+    if 'serialNumber' in item:
+        device_dict["serial"] = item["serialNumber"]
+    device_dict['category'] = 'DNAC'
+    device_list.append(device_dict)
+
+with open("stage2.json", "w") as outfile:
+    json.dump(device_list, outfile)
