@@ -40,10 +40,13 @@ for item in devices.json():
         device_dict["mac"] = item["mac"]
     if 'serial' in item:
         device_dict["serial"] = item["serial"]
+    device_dict['category'] = "Meraki"
     device_list.append(device_dict)
 
 with open("stage1.json", "w") as outfile:
     json.dump(device_list, outfile)
+
+
 
 
 dnac_auth_url = f"{config['DNAC_BASE_URL']}/dna/system/api/v1/auth/token"
@@ -63,8 +66,8 @@ for item in devs.json()['response']:
         device_dict["name"] = item["hostname"]
     if 'type' in item:
         device_dict["type"] = item["type"]
-    if 'mac' in item:
-        device_dict["macAddress"] = item["macAddress"]
+    if 'macAddress' in item:
+        device_dict["mac"] = item["macAddress"]
     if 'serialNumber' in item:
         device_dict["serial"] = item["serialNumber"]
     device_dict['category'] = 'DNAC'
